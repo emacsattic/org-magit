@@ -24,6 +24,9 @@
 
 ;;; Code:
 
+(require 'org)
+(require 'magit)
+
 (defun org-magit-split-string (str)
   (split-string str "::"))
 
