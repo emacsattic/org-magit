@@ -27,8 +27,35 @@
 (require 'org)
 (require 'magit)
 
+(defvar org-magit-actions
+  '((status :open current-buffer)
+    (log :open org-magit-open-log)
+    (commit :open org-magit-open-commit)))
+
+(defvar org-magit-public-remote "origin")
+
+(defvar org-magit-config-prefix "org-magit")
+
+(defvar org-magit-known-public-providers
+  '(("^git@github.com:\\(.*\\)\\.git"
+     status "https://github.com/\\1/"
+     log "https://github.com/\\1/commits"
+     commit "https://github.com/\\1/commit/%s")))
+
 (defun org-magit-split-string (str)
-  (split-string str "::"))
+  (let* ((strlist (split-string str "::"))
+         (repo (first strlist))
+         (view (second strlist))
+         (view-sym nil)
+         (args nil))
+    (cond ((string-match "^status" view)
+           (setq view-sym 'status))
+          ((string-match "^log" view)
+           (setq view-sym 'log))
+          ((string-match "^commit@\\(.*\\)" view)
+           (setq view-sym 'commit
+                 args (list (match-string 1 view)))))
+    (list view-sym repo args)))
 
 (defun org-magit-open-log ()
   (magit-display-log)
@@ -39,24 +66,48 @@
   (get-buffer magit-commit-buffer-name))
 
 (defun org-magit-open (str)
-  (let* ((strlist (org-magit-split-string str))
-         (repo (first strlist))
-         (view (second strlist))
-         (func nil)
-         (args nil))
-    (cond ((string-match "^status" view)
-           (setq func 'current-buffer))
-          ((string-match "^log" view)
-           (setq func 'org-magit-open-log))
-          ((string-match "^commit@\\(.*\\)" view)
-           (setq func 'org-magit-open-commit
-                 args (list (match-string 1 view)))))
-
+  (let* ((split (org-magit-split-string str))
+         (view (first split))
+         (repo (second split))
+         (func (plist-get (cdr (assoc view org-magit-actions)) :open))
+         (args (third split)))
     (when func
       (pop-to-buffer
        (save-window-excursion
          (magit-status repo)
          (apply func args))))))
+
+(defun org-magit-get (repo &rest keys)
+  (let ((default-directory repo))
+    (apply 'magit-get keys)))
+
+(defun org-magit-guess-public-url (view url)
+  (let ((res nil))
+    (dolist (provider org-magit-known-public-providers)
+      (let ((regexp (car provider)))
+        (when (string-match regexp url)
+          (setq res (replace-match (plist-get (cdr provider) view) nil nil url)))))
+    res))
+
+(defun org-magit-generate-public-url (path)
+  (let* ((split (org-magit-split-string path))
+         (view (first split))
+         (repo (second split))
+         (remote (or (org-magit-get repo (format "%s.remote" org-magit-config-prefix))
+                     org-magit-public-remote))
+         (tpl (or (org-magit-get repo (format "%s.%s" org-magit-config-prefix view))
+                  (org-magit-guess-public-url
+                   view (org-magit-get repo (format "remote.%s.url" remote))))))
+    (apply 'format tpl (third split))))
+
+(defun org-magit-export (path desc format)
+  (let ((url (or (org-magit-generate-public-url path) path)))
+    (set-text-properties 0 (length url) nil url)
+    (set-text-properties 0 (length desc) nil desc)
+    (cond
+     ((eq format 'html) (format "<a href=\"%s\">%s</a>" url (or desc url)))
+     ((eq format 'latex) (format "\\href{%s}{%s}" url (or desc url)))
+     (t (or desc url)))))
 
 (defun org-magit-make-link (repo &rest components)
   (apply 'org-make-link "magit:" repo components))
@@ -88,7 +139,7 @@
        :link link
        :description description))))
 
-(org-add-link-type "magit" 'org-magit-open)
+(org-add-link-type "magit" 'org-magit-open 'org-magit-export)
 (add-hook 'org-store-link-functions 'org-magit-store-link)
 
 (provide 'org-magit)
