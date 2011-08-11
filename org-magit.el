@@ -152,16 +152,19 @@ representation of this path as output."
     (dolist (provider org-magit-known-public-providers)
       (let ((regexp (car provider)))
         (when (string-match regexp url)
-          (setq res (replace-match (plist-get (cdr provider) view) nil nil url)))))
+          (setq res (replace-match (plist-get (cdr provider) view)
+                                   nil nil url)))))
     res))
 
 (defun org-magit-generate-public-url (path)
   (let* ((split (org-magit-split-string path))
          (view (first split))
          (repo (second split))
-         (remote (or (org-magit-get repo (format "%s.remote" org-magit-config-prefix))
+         (remote (or (org-magit-get
+                      repo (format "%s.remote" org-magit-config-prefix))
                      org-magit-public-remote))
-         (tpl (or (org-magit-get repo (format "%s.%s" org-magit-config-prefix view))
+         (tpl (or (org-magit-get
+                   repo (format "%s.%s" org-magit-config-prefix view))
                   (org-magit-guess-public-url
                    view (org-magit-get repo (format "remote.%s.url" remote))))))
     (apply 'format tpl (third split))))
@@ -199,9 +202,12 @@ representation of this path as output."
              (setq link (org-magit-make-link repo "::log")
                    description (format "%s log" description)))
             (magit-commit-mode
-             (setq link (org-magit-make-link repo "::commit@" magit-currently-shown-commit)
+             (setq link
+                   (org-magit-make-link repo "::commit@"
+                                        magit-currently-shown-commit)
                    description (format "%s commit #%s" description
-                                       (substring magit-currently-shown-commit 0 8)))))
+                                       (substring magit-currently-shown-commit
+                                                  0 8)))))
 
       (org-store-link-props
        :type "magit"
