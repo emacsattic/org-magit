@@ -120,12 +120,16 @@ representation of this path as output."
     (list view-sym repo args)))
 
 (defun org-magit-open-log ()
-  (magit-display-log)
-  (current-buffer))
+  (let ((buffer (current-buffer)))
+    (magit-display-log)
+    (bury-buffer buffer)
+    (current-buffer)))
 
 (defun org-magit-open-commit (commit)
-  (magit-show-commit commit)
-  (get-buffer magit-commit-buffer-name))
+  (let ((buffer (current-buffer)))
+    (magit-show-commit commit)
+    (bury-buffer buffer)
+    (get-buffer magit-commit-buffer-name)))
 
 (defun org-magit-open (str)
   (let* ((split (org-magit-split-string str))
