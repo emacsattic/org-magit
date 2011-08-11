@@ -32,15 +32,49 @@
     (log :open org-magit-open-log)
     (commit :open org-magit-open-commit)))
 
-(defvar org-magit-public-remote "origin")
+(defgroup org-magit nil
+  "Magit links for org-mode"
+  :group 'magit
+  :group 'org-link)
 
-(defvar org-magit-config-prefix "org-magit")
+(defcustom org-magit-public-remote "origin"
+  "Default remote to use when exporting links."
+  :group 'org-magit
+  :type 'string)
 
-(defvar org-magit-known-public-providers
+(defcustom org-magit-config-prefix "org-magit"
+  "Section to read from in git repository configuration."
+  :group 'org-magit
+  :type 'string)
+
+(defcustom org-magit-known-public-providers
   '(("^git@github.com:\\(.*\\)\\.git"
      status "https://github.com/\\1/"
      log "https://github.com/\\1/commits"
-     commit "https://github.com/\\1/commit/%s")))
+     commit "https://github.com/\\1/commit/%s"))
+  "List of git providers, and how to generate links for each
+  object category."
+  :group 'org-magit
+  :type '(repeat (list :tag "Provider identifier" regexp
+                       (set :tag "URL templates" :inline t
+                            (list :inline t
+                                  (const :tag "Status" status)
+                                  (string :tag "Status URL"))
+                            (list :inline t
+                                  (const :tag "Log" log)
+                                  (string :tag "Log URL"))
+                            (list :inline t
+                                  (const :tag "Commit" commit)
+                                  (string :tag "Commit URL"))
+                            ))))
+
+(defcustom org-magit-filename-transformer
+  'abbreviate-file-name
+  "Function to call to produce canonical repository name. This
+must take a path as input, and provide an equivalent
+representation of this path as output."
+  :group 'org-magit
+  :type 'function)
 
 (defun org-magit-split-string (str)
   (let* ((strlist (split-string str "::"))
@@ -120,7 +154,10 @@
 
 (defun org-magit-store-link ()
   (when (eq major-mode 'magit-mode)
-    (let* ((repo default-directory)
+    (let* ((repo (or (and org-magit-filename-transformer
+                          (funcall org-magit-filename-transformer
+                                   default-directory))
+                     default-directory))
            (link nil)
            (description (org-magit-clean-repository repo)))
       (cond (magit-status-mode
