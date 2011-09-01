@@ -3,7 +3,9 @@
 ;; Copyright (C) 2011  Yann Hodique.
 
 ;; Author: Yann Hodique <yann.hodique@gmail.com>
-;; Keywords:
+;; Keywords: git, magit, outlines
+;; Version: 0.1
+;; Package-Requires: ((magit "0.8") (org "6.01"))
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -131,6 +133,7 @@ representation of this path as output."
     (bury-buffer buffer)
     (get-buffer magit-commit-buffer-name)))
 
+;;;###autoload
 (defun org-magit-open (str)
   (let* ((split (org-magit-split-string str))
          (view (first split))
@@ -169,6 +172,7 @@ representation of this path as output."
                    view (org-magit-get repo (format "remote.%s.url" remote))))))
     (apply 'format tpl (third split))))
 
+;;;###autoload
 (defun org-magit-export (path desc format)
   (let ((url (or (org-magit-generate-public-url path) path)))
     (set-text-properties 0 (length url) nil url)
@@ -187,6 +191,7 @@ representation of this path as output."
       (setq name (concat name ".git")))
     name))
 
+;;;###autoload
 (defun org-magit-store-link ()
   (when (eq major-mode 'magit-mode)
     (let* ((repo (or (and org-magit-filename-transformer
@@ -214,8 +219,11 @@ representation of this path as output."
        :link link
        :description description))))
 
-(org-add-link-type "magit" 'org-magit-open 'org-magit-export)
-(add-hook 'org-store-link-functions 'org-magit-store-link)
+;;;###autoload
+(eval-after-load 'org
+  '(progn
+     (org-add-link-type "magit" 'org-magit-open 'org-magit-export)
+     (add-hook 'org-store-link-functions 'org-magit-store-link)))
 
 (provide 'org-magit)
 ;;; org-magit.el ends here
