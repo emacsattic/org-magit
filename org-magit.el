@@ -4,7 +4,7 @@
 
 ;; Author: Yann Hodique <yann.hodique@gmail.com>
 ;; Keywords: git, magit, outlines
-;; Version: 0.1
+;; Version: 0.1.1
 ;; Package-Requires: ((magit "0.8") (org "6.01"))
 
 ;; This file is free software; you can redistribute it and/or modify
@@ -53,6 +53,9 @@
 ;; $ git config org-magit.log http://myserver/plop.git/history
 
 ;;; Code:
+
+(eval-when-compile
+  (require 'cl))
 
 (require 'org)
 (require 'magit)
@@ -220,7 +223,7 @@ representation of this path as output."
        :description description))))
 
 ;;;###autoload
-(eval-after-load 'org
+(eval-after-load "org"
   '(progn
      (org-add-link-type "magit" 'org-magit-open 'org-magit-export)
      (add-hook 'org-store-link-functions 'org-magit-store-link)))
