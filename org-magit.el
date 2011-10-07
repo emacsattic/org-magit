@@ -194,22 +194,30 @@ representation of this path as output."
       (setq name (concat name ".git")))
     name))
 
+;; magit used to have only one major-mode: magit-mode, and minor-modes for
+;; status, log and commit. Now they are all major-modes deriving from
+;; magit-mode. Let's have a backward-compatible check for the
+;; current magit mode.
+(defmacro org-magit-check-mode (mode)
+  `(or (and (boundp ',mode) ,mode)
+       (derived-mode-p ',mode)))
+
 ;;;###autoload
 (defun org-magit-store-link ()
-  (when (eq major-mode 'magit-mode)
+  (when (derived-mode-p 'magit-mode)
     (let* ((repo (or (and org-magit-filename-transformer
                           (funcall org-magit-filename-transformer
                                    default-directory))
                      default-directory))
            (link nil)
            (description (org-magit-clean-repository repo)))
-      (cond (magit-status-mode
+      (cond ((org-magit-check-mode magit-status-mode)
              (setq link (org-magit-make-link repo "::status")
                    description (format "%s status" description)))
-            (magit-log-mode
+            ((org-magit-check-mode magit-log-mode)
              (setq link (org-magit-make-link repo "::log")
                    description (format "%s log" description)))
-            (magit-commit-mode
+            ((org-magit-check-mode magit-commit-mode)
              (setq link
                    (org-magit-make-link repo "::commit@"
                                         magit-currently-shown-commit)
