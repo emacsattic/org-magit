@@ -169,11 +169,21 @@ representation of this path as output."
          (remote (or (org-magit-get
                       repo (format "%s.remote" org-magit-config-prefix))
                      org-magit-public-remote))
+         remote-repo
          (tpl (or (org-magit-get
                    repo (format "%s.%s" org-magit-config-prefix view))
                   (org-magit-guess-public-url
-                   view (org-magit-get repo (format "remote.%s.url" remote))))))
-    (apply 'format tpl (third split))))
+                   view (setq remote-repo
+                              (org-magit-get
+                               repo (format "remote.%s.url" remote)))))))
+    (or (and tpl
+             (apply 'format tpl (third split)))
+        (and remote-repo
+             (concat remote-repo (when (third split)
+                                   (concat "@"
+                                           (mapconcat 'identity
+                                                      (third split) "@")))))
+        path)))
 
 ;;;###autoload
 (defun org-magit-export (path desc format)
