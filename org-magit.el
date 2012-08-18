@@ -186,7 +186,7 @@ representation of this path as output."
      (t (or desc url)))))
 
 (defun org-magit-make-link (repo &rest components)
-  (apply 'org-make-link "magit:" repo components))
+  (apply 'concat "magit:" repo components))
 
 (defun org-magit-clean-repository (repo)
   (let ((name (file-name-nondirectory (directory-file-name repo))))
