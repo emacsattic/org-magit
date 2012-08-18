@@ -218,12 +218,15 @@ representation of this path as output."
              (setq link (org-magit-make-link repo "::log")
                    description (format "%s log" description)))
             ((org-magit-check-mode magit-commit-mode)
-             (setq link
-                   (org-magit-make-link repo "::commit@"
-                                        magit-currently-shown-commit)
-                   description (format "%s commit #%s" description
-                                       (substring magit-currently-shown-commit
-                                                  0 8)))))
+             (let ((short-sha (if (> (length magit-currently-shown-commit) 8)
+                                  (substring magit-currently-shown-commit
+                                             0 8)
+                                magit-currently-shown-commit)))
+               (setq link
+                     (org-magit-make-link repo "::commit@"
+                                          magit-currently-shown-commit)
+                     description (format "%s commit #%s" description
+                                         short-sha)))))
 
       (org-store-link-props
        :type "magit"
