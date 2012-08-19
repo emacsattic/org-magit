@@ -1,10 +1,10 @@
 ;;; org-magit.el --- basic support for magit links
 
-;; Copyright (C) 2011  Yann Hodique.
+;; Copyright (C) 2011, 2012  Yann Hodique.
 
 ;; Author: Yann Hodique <yann.hodique@gmail.com>
 ;; Keywords: git, magit, outlines
-;; Version: 0.1.2
+;; Version: 0.2.0
 ;; Package-Requires: ((magit "0.8") (org "6.01"))
 
 ;; This file is free software; you can redistribute it and/or modify
