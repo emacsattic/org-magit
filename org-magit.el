@@ -126,7 +126,7 @@ representation of this path as output."
 
 (defun org-magit-open-log ()
   (let ((buffer (current-buffer)))
-    (magit-display-log)
+    (funcall (if (fboundp 'magit-log) 'magit-log 'magit-display-log))
     (bury-buffer buffer)
     (current-buffer)))
 
