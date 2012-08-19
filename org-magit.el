@@ -80,11 +80,47 @@
   :group 'org-magit
   :type 'string)
 
+(defun org-magit-gitweb-provider (base)
+  `(status ,(concat base "/?p=\\1;a=summary")
+           log ,(concat base "/?p=\\1;a=log")
+           commit ,(concat base "/?p=\\1;a=commit;h=%s")))
+
+(defun org-magit-gitorious-provider (base)
+  `(status ,(concat base "/\\1")
+           log ,(concat base "/\\1/commits")
+           commit ,(concat base "/\\1/commit/%s")))
+
 (defcustom org-magit-known-public-providers
-  '(("^git@github.com:\\(.*\\)\\.git"
+  `(;; GitHub
+    (,(rx bol (or "git@github.com:"
+                  (and (or "git" "ssh" "http" "https") "://"
+                       (* nonl) (? "@") "github.com/"))
+          (group (* nonl)) ".git")
      status "https://github.com/\\1/"
      log "https://github.com/\\1/commits"
-     commit "https://github.com/\\1/commit/%s"))
+     commit "https://github.com/\\1/commit/%s")
+    ;; Gitorious
+    (,(rx bol (or "git@gitorious.org:"
+                  (and (or "git://gitorious.org/"
+                           (and
+                            (or "http" "https")
+                            "://git.gitorious.org/"))))
+          (group (* nonl)) ".git")
+     ,@(org-magit-gitorious-provider "https://gitorious.org"))
+    ;; Bitbucket
+    (,(rx bol (or "git@bitbucket.org:"
+                  (and (or "ssh" "http" "https") "://"
+                       (* nonl) (? "@") "bitbucket.org")) (group (* nonl)))
+     status "https://bitbucket.org/\\1"
+     log "https://bitbucket.org/\\1/changesets"
+     commit "https://bitbucket.org/\\1/changeset/%s")
+    ;; org-mode
+    (,(rx bol "git://orgmode.org/" (group (* nonl) ".git"))
+     ,@(org-magit-gitweb-provider "http://orgmode.org/w"))
+    ;; kernel.org
+    (,(rx bol (or "git" "http" "https") "://git.kernel.org/pub/scm/"
+          (group (* nonl) ".git"))
+     ,@(org-magit-gitweb-provider "http://git.kernel.org")))
   "List of git providers, and how to generate links for each
   object category."
   :group 'org-magit
@@ -98,8 +134,7 @@
                                   (string :tag "Log URL"))
                             (list :inline t
                                   (const :tag "Commit" commit)
-                                  (string :tag "Commit URL"))
-                            ))))
+                                  (string :tag "Commit URL"))))))
 
 (defcustom org-magit-filename-transformer
   'abbreviate-file-name
