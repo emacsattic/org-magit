@@ -190,11 +190,12 @@ representation of this path as output."
 
 (defun org-magit-guess-public-url (view url)
   (let ((res nil))
-    (dolist (provider org-magit-known-public-providers)
-      (let ((regexp (car provider)))
-        (when (string-match regexp url)
-          (setq res (replace-match (plist-get (cdr provider) view)
-                                   nil nil url)))))
+    (when url
+      (dolist (provider org-magit-known-public-providers)
+        (let ((regexp (car provider)))
+          (when (string-match regexp url)
+            (setq res (replace-match (plist-get (cdr provider) view)
+                                     nil nil url))))))
     res))
 
 (defun org-magit-generate-public-url (path)
