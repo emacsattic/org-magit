@@ -219,6 +219,11 @@ representation of this path as output."
                                    (concat "@"
                                            (mapconcat 'identity
                                                       (third split) "@")))))
+        (and (featurep 'magit-svn)
+             (let* ((default-directory repo)
+                    (info (magit-svn-get-ref-info)))
+               (and info
+                    (cdr (assoc 'url info)))))
         path)))
 
 ;;;###autoload
