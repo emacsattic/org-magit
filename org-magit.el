@@ -5,7 +5,7 @@
 ;; Author: Yann Hodique <yann.hodique@gmail.com>
 ;; Keywords: git, magit, outlines
 ;; Version: 0.2.0
-;; Package-Requires: ((magit "0.8") (org "6.01"))
+;; Package-Requires: ((magit "1.2.0") (org "6.01"))
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@
 (defvar org-magit-actions
   '((status :open current-buffer)
     (log :open org-magit-open-log)
-    (commit :open org-magit-open-commit)))
+    (commit :open magit-show-commit)))
 
 (defgroup org-magit nil
   "Magit links for org-mode"
@@ -165,12 +165,6 @@ representation of this path as output."
     (bury-buffer buffer)
     (current-buffer)))
 
-(defun org-magit-open-commit (commit)
-  (let ((buffer (current-buffer)))
-    (magit-show-commit commit)
-    (bury-buffer buffer)
-    (get-buffer magit-commit-buffer-name)))
-
 ;;;###autoload
 (defun org-magit-open (str)
   (let* ((split (org-magit-split-string str))
@@ -269,14 +263,11 @@ representation of this path as output."
              (setq link (org-magit-make-link repo "::log")
                    desc (format "%s log" desc)))
             ((org-magit-check-mode magit-commit-mode)
-             (let ((short-sha (if (> (length magit-currently-shown-commit) 8)
-                                  (substring magit-currently-shown-commit
-                                             0 8)
-                                magit-currently-shown-commit)))
-               (setq link (org-magit-make-link repo "::commit@"
-					       magit-currently-shown-commit)
-                     desc (format "%s commit #%s" desc short-sha)))))
-
+	     (setq link (org-magit-make-link repo "::commit@"
+					     (car magit-refresh-args))
+		   desc (format "%s commit #%s" desc
+				(magit-rev-parse
+				 "--short" (car magit-refresh-args))))))
       (org-store-link-props
        :type "magit"
        :link link
