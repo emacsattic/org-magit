@@ -261,28 +261,26 @@ representation of this path as output."
                                    default-directory))
                      default-directory))
            (link nil)
-           (description (org-magit-clean-repository repo)))
+           (desc (org-magit-clean-repository repo)))
       (cond ((org-magit-check-mode magit-status-mode)
              (setq link (org-magit-make-link repo "::status")
-                   description (format "%s status" description)))
+                   desc (format "%s status" desc)))
             ((org-magit-check-mode magit-log-mode)
              (setq link (org-magit-make-link repo "::log")
-                   description (format "%s log" description)))
+                   desc (format "%s log" desc)))
             ((org-magit-check-mode magit-commit-mode)
              (let ((short-sha (if (> (length magit-currently-shown-commit) 8)
                                   (substring magit-currently-shown-commit
                                              0 8)
                                 magit-currently-shown-commit)))
-               (setq link
-                     (org-magit-make-link repo "::commit@"
-                                          magit-currently-shown-commit)
-                     description (format "%s commit #%s" description
-                                         short-sha)))))
+               (setq link (org-magit-make-link repo "::commit@"
+					       magit-currently-shown-commit)
+                     desc (format "%s commit #%s" desc short-sha)))))
 
       (org-store-link-props
        :type "magit"
        :link link
-       :description description))))
+       :description desc))))
 
 ;;;###autoload
 (eval-after-load "org"
