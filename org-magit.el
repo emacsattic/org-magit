@@ -219,7 +219,7 @@ representation of this path as output."
                                    (concat "@"
                                            (mapconcat 'identity
                                                       (third split) "@")))))
-        (and (featurep 'magit-svn)
+        (and (fboundp 'magit-svn-get-ref-info)
              (let* ((default-directory repo)
                     (info (magit-svn-get-ref-info)))
                (and info
