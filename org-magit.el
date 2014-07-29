@@ -173,10 +173,9 @@ representation of this path as output."
          (func (plist-get (cdr (assoc view org-magit-actions)) :open))
          (args (third split)))
     (when func
-      (pop-to-buffer
-       (save-window-excursion
-         (magit-status repo)
-         (apply func args))))))
+      (save-window-excursion
+        (magit-status repo))
+      (apply func args))))
 
 (defun org-magit-get (repo &rest keys)
   (let ((default-directory repo))
