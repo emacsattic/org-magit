@@ -262,7 +262,8 @@ representation of this path as output."
             ((org-magit-check-mode magit-log-mode)
              (setq link (org-magit-make-link repo "::log")
                    desc (format "%s log" desc)))
-            ((org-magit-check-mode magit-commit-mode)
+            ((or (org-magit-check-mode magit-commit-mode)
+                 (org-magit-check-mode magit-revision-mode))
 	     (setq link (org-magit-make-link repo "::commit@"
 					     (car magit-refresh-args))
 		   desc (format "%s commit #%s" desc
