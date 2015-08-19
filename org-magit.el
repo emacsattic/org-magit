@@ -24,6 +24,10 @@
 
 ;;; Commentary:
 
+;;   This package is deprecated.
+;;   Instead use the successor `orgit'.
+;;   See https://github.com/magit/orgit.
+
 ;; This module adds support for magit links in org buffers. The following links
 ;; are supported:
 ;; - magit:/path/to/repo::commit@<hash>
